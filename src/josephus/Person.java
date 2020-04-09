@@ -10,15 +10,19 @@ public class Person { //Nikki, Andrew, Matt
 	private int posY;
 	public Image image;
 	public ImageView iView;
+	public int id;
 	
-	Person(int x, int y){
+	Person(int x, int y, int id){
 	alive = true;
 	posX = x;
 	posY = y;
 	image = new Image("alive.png");
 	iView = new ImageView(image);
+	this.id = id;
 		
 	}
+	
+	public boolean isAlive() {return alive;}
 	
 	public void kill() {
 		alive = false;

@@ -93,7 +93,7 @@ public class Josephus {
 	}
 	public static void main(String[] args) {
 
-		prediction(41);
+		prediction(17);
 		
 		//int k = 3;
 		//int n = 4;
