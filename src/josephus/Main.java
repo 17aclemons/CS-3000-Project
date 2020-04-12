@@ -1,8 +1,6 @@
 package josephus;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.LinkedList;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -13,16 +11,22 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Main extends Application implements EventHandler<ActionEvent> {
 	// window stage
 	// scene content inside stage
 
+
+	
+	
 	Button predict;
 	Button animate;
 	int numPeople;
@@ -30,8 +34,33 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	int defaultSliderNum = 15;
 
 	public static void main(String[] args) { // Nikki, Andrew, Matt
+		
+		//test(9);
+		
 		launch(args); // sets everything up and runs start
+
 	}
+/*
+	public static void test(int testlength) {	//when testing, make josephus method static.
+		Person[] test = new Person[testlength];
+
+		for(int i = 0; i < testlength; i++) {
+			test[i] = new Person(0, 1, i+1);
+		}
+		
+		Pane p = new Pane();
+		
+		Person winner = josephus(p, test, 0);
+		System.out.println(winner.id +" is the winner");
+		
+		
+		boolean[] b = numToBinary(testlength);
+		binaryToNum(b);
+		swap(b);
+		int prediction = binaryToNum(b);
+		System.out.println("our prediction was "+ prediction);
+	}
+*/
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -41,7 +70,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		makeSliders(layout, people, defaultSliderNum);
 		makeCircle(layout, numPeople);
 		makeDashboard(layout, numPeople, people);
-		Scene scene = new Scene(layout, 1000, 600); // set dimensions of scene
+		Scene scene = new Scene(layout, 1050, 600); // set dimensions of scene
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
@@ -51,6 +80,73 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	public void handle(ActionEvent event) {
 		System.out.println("event! nice.");
 	}
+	
+	public void sleep() throws InterruptedException {
+		Thread.sleep(0);
+	}
+
+	public Person josephus(Pane layout, Person[] p, Person[] orig, int firstIndex) throws InterruptedException { //recursive josephus method
+		Person lastAlive = p[0];
+		//TODO: grab the index of the last alive to pass into recursive method.
+		int newArrayLength = p.length;
+		
+		if(p.length == 1) {
+			return p[0];
+		}else {
+			
+			if (firstIndex == 0) { //if we start killing at spot 0
+				System.out.println("start spot 0");
+				for(int i = 0; i < p.length; i++) {
+					if (p[i].isAlive()) {
+						if(i+1 < p.length) {
+							p[i+1].kill();
+							
+							newArrayLength--;
+							updateCircle(layout, orig.length, orig);
+	sleep();
+						}else { lastAlive = p[i]; }
+					}
+				}
+			} else { //the first spot to kill is NOT at the beginning of our array...
+				p[0].kill();
+				
+				updateCircle(layout, orig.length, orig);
+	sleep();
+				System.out.println("not");
+				newArrayLength--;
+				for(int i = 1; i < p.length; i++) {
+					if (p[i].isAlive()) {
+						if(i+1 < p.length) {
+							p[i+1].kill();
+							
+							updateCircle(layout, orig.length, orig);
+	sleep();
+							newArrayLength--;
+						}else { lastAlive = p[i]; }
+					}
+				}
+			}
+			
+			//build new array with only alive people
+			Person[] nextRound = new Person[newArrayLength];
+			int index = 0;
+			for(int i = 0; i < p.length; i++) {
+				if(p[i].isAlive()) {
+					nextRound[index] = p[i];
+					index++;
+					System.out.print(p[i].id + " ");
+
+				}
+				if(p[i].id == lastAlive.id) {
+					firstIndex = i;
+				}
+				
+			}
+			System.out.println();
+			return josephus(layout, nextRound, orig, firstIndex);
+			
+		}
+	}
 
 	public void clearCircle(Pane layout, int n, Person[] p) { // remember to makecircle or update circle
 		layout.getChildren().clear();
@@ -59,35 +155,32 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	}
 
 	public void makeDashboard(Pane layout, int n, Person[] p) { // Buttons, line
-		predict = new Button();
-		predict.setText("Generate Prediction");
-		predict.setLayoutX(800);
-		predict.setLayoutY(150);
-		predict.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle1(ActionEvent e) {
-			}
 
-			@Override
-			public void handle(ActionEvent arg0) {
-				System.out.println("generated");
-				generate(layout, 2, n); // k = 2
-			}
-		});
+		ImageView sickLogo = new ImageView("niceLogo.png");
+		sickLogo.setX(725);
+		sickLogo.setY(50);
+		layout.getChildren().add(sickLogo);
+		
+		
 
-		// *************************
 
-		animate = new Button();
-		animate.setText("Run Animation");
+		ImageView runImage = new ImageView("run.png");
+		animate = new Button("Run Animation", runImage);
+		animate.setFont(new Font("Arial", 14));
 		animate.setLayoutX(800);
 		animate.setLayoutY(250);
 		animate.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle1(ActionEvent e) {
-			}
+			public void handle1(ActionEvent e) { }
 
 			@Override
 			public void handle(ActionEvent arg0) {
 				System.out.println("animated");
-				runJosephus(layout, people, n);
+				try {
+					josephus(layout, people, people, 0);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 			}
 		});
@@ -97,7 +190,6 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		line.setStroke(Color.BLACK);
 		line.setStrokeWidth(1);
 
-		layout.getChildren().add(predict);
 		layout.getChildren().add(animate);
 		layout.getChildren().add(line);
 
@@ -107,7 +199,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		// ****************************
 		Slider nPeople = new Slider(2, 30, current);
 		nPeople.setTranslateX(800);
-		nPeople.setTranslateY(500);
+		nPeople.setTranslateY(200);
 		nPeople.setShowTickLabels(true);
 		nPeople.setShowTickMarks(true);
 		nPeople.setBlockIncrement(1);
@@ -130,6 +222,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 			int n = (int) nPeople.getValue();
 			clearCircle(layout, n, p);
 			makeCircle(layout, n);
+			generate(layout, 2, n); // k = 2
 		});
 
 		nPeople.valueProperty().addListener(new ChangeListener<Number>() {
@@ -138,9 +231,9 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 				nLabel.textProperty().setValue("People in circle: " + String.valueOf(newValue.intValue()));
 			}
 		});
-
-		nLabel.setTranslateX(800);
-		nLabel.setTranslateY(450);
+		nLabel.setFont(new Font("Arial", 14));
+		nLabel.setTranslateX(808);
+		nLabel.setTranslateY(170);
 		layout.getChildren().addAll(nPeople, nLabel);
 		nLabel.accessibleTextProperty().setValue("n");
 
@@ -159,18 +252,26 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		layout.getChildren().add(circle);
 
 		this.people = new Person[n];
+		Text[] circleLabels = new Text[n];
 		for (int i = 0; i < n; i++) {
 			int x = (int) findChairX(radius, i, n) + centerX;
 			int y = (int) findChairY(radius, i, n) + centerY;
 			//System.out.println("(" + x + "," + y + ")");
-			people[i] = new Person(x, y, i);
+			people[i] = new Person(x, y, i+1);
 			layout.getChildren().add(people[i].iView);
 			people[i].iView.relocate(x - 25, y - 25);
+			
+			//janky circle labels
+			circleLabels[i] = new Text(String.valueOf((people[i].id)));
+			circleLabels[i].setX(x);
+			circleLabels[i].setY(y);
+			layout.getChildren().add(circleLabels[i]);
 		}
 
 	}
 
 	public void updateCircle(Pane layout, int n, Person[] people) {
+		
 		clearCircle(layout, n, people);
 
 		int centerX = 350;
@@ -180,14 +281,21 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		Circle circle = new Circle(centerX, centerY, radius, Color.LIGHTGRAY);
 
 		layout.getChildren().add(circle);
-
+		Text[] circleLabels = new Text[n];
 		for (int i = 0; i < n; i++) {
 			int x = (int) findChairX(radius, i, n) + centerX;
 			int y = (int) findChairY(radius, i, n) + centerY;
 			//System.out.println("(" + x + "," + y + ")");
 			layout.getChildren().add(people[i].iView);
 			people[i].iView.relocate(x - 25, y - 25);
+			
+			//janky circle labels
+			circleLabels[i] = new Text(String.valueOf((people[i].id)));
+			circleLabels[i].setX(x);
+			circleLabels[i].setY(y);
+			layout.getChildren().add(circleLabels[i]);
 		}
+
 	}
 
 	public double findChairX(int r, int currentPoint, int totalPoints) { // we used two algorithms for this hoe
@@ -219,65 +327,6 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		layout.getChildren().add(predictionLabel);
 
 	}
-
-	public void runJosephus(Pane layout, Person[] p, int n) {
-		
-		
-		
-		
-		int numAlive = n;
-		int myTurn = 0;
-		boolean check = true;
-		int hop = 1;
-		Person winner = p[0];
-
-		while (check) {
-			
-			if (numAlive == 2) { 				//this is the last round: 2 people alive
-				check = false;
-			}
-			
-			if(myTurn == n+1) {					//if last spot in circle, assign it to the next alive spot.
-				for(int i = 0; i < n; i++) {
-					if(p[i].isAlive()) {
-						myTurn = i;
-						break;
-					}
-				}
-			}
-			
-			if (p[myTurn + hop].isAlive()) {	
-				p[myTurn + hop].kill();
-			} else {
-				hop++;
-			}
-			
-			for(int i = 0; i < n; i++) {
-				if(p[i].isAlive()) {
-					myTurn = i;
-					break;
-				}
-			}
-			
-			numAlive--;
-			winner = p[myTurn];
-		}
-		System.out.println("The winner is " + winner.id);
-
-		updateCircle(layout, n, p);
-	}
-	
-	/*
-	public static LinkedList<Person> array2List(Person[] p) {
-		LinkedList<Person> L = new LinkedList<Person>(Arrays.asList(p));
-		return L;
-	}
-	
-	public static Person[] list2Array(LinkedList<Person> L) {
-		Person[] p = new Person
-		return p;
-	}
-	*/
 
 	public static boolean[] numToBinary(int n) { // Nikki
 		BigInteger bi = BigInteger.valueOf(n);
