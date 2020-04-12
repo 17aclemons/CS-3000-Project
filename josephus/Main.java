@@ -68,6 +68,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		Pane layout = new Pane();
 
 		makeSliders(layout, people, defaultSliderNum);
+		generate(layout, 2, defaultSliderNum); // k = 2
 		makeCircle(layout, numPeople);
 		makeDashboard(layout, numPeople, people);
 		Scene scene = new Scene(layout, 1050, 600); // set dimensions of scene
@@ -82,7 +83,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 	}
 	
 	public void sleep() throws InterruptedException {
-		Thread.sleep(0);
+		Thread.sleep(200);
+		System.out.println("sleepy time");
 	}
 
 	public Person josephus(Pane layout, Person[] p, Person[] orig, int firstIndex) throws InterruptedException { //recursive josephus method
@@ -95,15 +97,15 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		}else {
 			
 			if (firstIndex == 0) { //if we start killing at spot 0
-				System.out.println("start spot 0");
+				System.out.println("start spot A");
 				for(int i = 0; i < p.length; i++) {
 					if (p[i].isAlive()) {
 						if(i+1 < p.length) {
 							p[i+1].kill();
-							
 							newArrayLength--;
 							updateCircle(layout, orig.length, orig);
-	sleep();
+	//sleep();
+							
 						}else { lastAlive = p[i]; }
 					}
 				}
@@ -111,8 +113,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 				p[0].kill();
 				
 				updateCircle(layout, orig.length, orig);
-	sleep();
-				System.out.println("not");
+	//sleep();
+				System.out.println("start spot B");
 				newArrayLength--;
 				for(int i = 1; i < p.length; i++) {
 					if (p[i].isAlive()) {
@@ -120,7 +122,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 							p[i+1].kill();
 							
 							updateCircle(layout, orig.length, orig);
-	sleep();
+	//sleep();
 							newArrayLength--;
 						}else { lastAlive = p[i]; }
 					}
@@ -142,14 +144,22 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 				}
 				
 			}
-			System.out.println();
+			//System.out.println();
 			return josephus(layout, nextRound, orig, firstIndex);
 			
 		}
 	}
 
 	public void clearCircle(Pane layout, int n, Person[] p) { // remember to makecircle or update circle
-		layout.getChildren().clear();
+		layout.getChildren().removeAll(layout.getChildren());
+		//layout.getChildren().clear();
+		System.out.println("cleared");
+		try {
+			sleep();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		makeSliders(layout, p, n);
 		makeDashboard(layout, n, p);
 	}
@@ -161,20 +171,19 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		sickLogo.setY(50);
 		layout.getChildren().add(sickLogo);
 		
-		
+		generate(layout, 2, n); // k = 2
 
 
 		ImageView runImage = new ImageView("run.png");
-		animate = new Button("Run Animation", runImage);
+		animate = new Button("  Run Animation", runImage);
 		animate.setFont(new Font("Arial", 14));
-		animate.setLayoutX(800);
+		animate.setLayoutX(795);
 		animate.setLayoutY(250);
 		animate.setOnAction(new EventHandler<ActionEvent>() {
-			public void handle1(ActionEvent e) { }
-
 			@Override
 			public void handle(ActionEvent arg0) {
 				System.out.println("animated");
+				
 				try {
 					josephus(layout, people, people, 0);
 				} catch (InterruptedException e) {
@@ -222,7 +231,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 			int n = (int) nPeople.getValue();
 			clearCircle(layout, n, p);
 			makeCircle(layout, n);
-			generate(layout, 2, n); // k = 2
+			//generate(layout, 2, n); // k = 2
 		});
 
 		nPeople.valueProperty().addListener(new ChangeListener<Number>() {
@@ -263,8 +272,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 			
 			//janky circle labels
 			circleLabels[i] = new Text(String.valueOf((people[i].id)));
-			circleLabels[i].setX(x);
-			circleLabels[i].setY(y);
+			circleLabels[i].setX(x-3);
+			circleLabels[i].setY(y+3);
 			layout.getChildren().add(circleLabels[i]);
 		}
 
@@ -291,8 +300,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 			
 			//janky circle labels
 			circleLabels[i] = new Text(String.valueOf((people[i].id)));
-			circleLabels[i].setX(x);
-			circleLabels[i].setY(y);
+			circleLabels[i].setX(x-3);
+			circleLabels[i].setY(y+3);
 			layout.getChildren().add(circleLabels[i]);
 		}
 
@@ -320,9 +329,11 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 		int prediction = binaryToNum(b);
 
 		predictionLabel = new Label("Prediction: Winning chair = " + String.valueOf(prediction));
-		System.out.println("Prediction: Chair "+ String.valueOf(prediction));
-		predictionLabel.setTranslateX(800);
-		predictionLabel.setTranslateY(200);
+		//System.out.println("Prediction: Chair "+ String.valueOf(prediction));
+		predictionLabel.setTranslateX(780);
+		predictionLabel.setTranslateY(300);
+		predictionLabel.setFont(new Font("Arial", 14));
+
 
 		layout.getChildren().add(predictionLabel);
 
@@ -342,7 +353,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 			}
 			//System.out.print(b[i] + " ");
 		}
-		System.out.println();
+		//System.out.println();
 		return b;
 	}
 
